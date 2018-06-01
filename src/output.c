@@ -1,12 +1,12 @@
 /* This file is part of GNU cflow
    Copyright (C) 1997, 2005, 2007, 2009-2011, 2014-2017 Sergey
    Poznyakoff
- 
+
    GNU cflow is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    GNU cflow is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -45,12 +45,12 @@ print_level(int lev, int last)
 {
      int i;
 
-     if (print_line_numbers) 
+     if (print_line_numbers)
 	  fprintf(outfile, "%5d ", out_line);
      if (print_levels)
 	  fprintf(outfile, "{%4d} ", lev);
      fprintf(outfile, "%s", level_begin);
-     for (i = 0; i < lev; i++) 
+     for (i = 0; i < lev; i++)
 	  fprintf(outfile, "%s", level_indent[ level_mark[i] ]);
      fprintf(outfile, "%s", level_end[last]);
 }
@@ -183,7 +183,7 @@ static int
 is_var(Symbol *symp)
 {
      if (include_symbol(symp)) {
-	  if (symp->type == SymIdentifier) 
+	  if (symp->type == SymIdentifier)
 	       return symp->storage == ExternStorage ||
 	 	      symp->storage == StaticStorage;
 	  else
@@ -243,16 +243,16 @@ print_type(Symbol *symp)
 		  symp->source,
 		  symp->def_line);
 }
-   
+
 void
 xref_output()
 {
      Symbol **symbols, *symp;
      size_t i, num;
-     
+
      num = collect_symbols(&symbols, is_var, 0);
      qsort(symbols, num, sizeof(*symbols), compare);
-     
+
      /* produce xref output */
      for (i = 0; i < num; i++) {
 	  symp = symbols[i];
@@ -302,7 +302,7 @@ direct_tree(int lev, int last, Symbol *sym)
 {
      struct linked_list_entry *p;
      int rc;
-     
+
      if (sym->type == SymUndefined
 	 || (max_depth && lev >= max_depth)
 	 || !include_symbol(sym))
@@ -327,7 +327,7 @@ inverted_tree(int lev, int last, Symbol *sym)
 {
      struct linked_list_entry *p;
      int rc;
-     
+
      if (sym->type == SymUndefined
 	 || (max_depth && lev >= max_depth)
 	 || !include_symbol(sym))
@@ -350,27 +350,27 @@ tree_output()
      Symbol **symbols, *main_sym;
      size_t i, num;
      cflow_depmap_t depmap;
-     
+
      /* Collect functions and assign them ordinal numbers */
      num = collect_functions(&symbols);
      for (i = 0; i < num; i++)
 	  symbols[i]->ord = i;
-     
+
      /* Create a dependency matrix */
      depmap = depmap_alloc(num);
      for (i = 0; i < num; i++) {
 	  if (symbols[i]->callee) {
 	       struct linked_list_entry *p;
-	       
+
 	       for (p = linked_list_head(symbols[i]->callee); p;
 		    p = p->next) {
 		    Symbol *s = (Symbol*) p->data;
 		    if (symbol_is_function(s))
 			 depmap_set(depmap, i, ((Symbol*)p->data)->ord);
-	       }		    
+	       }
 	  }
      }
-     
+
      depmap_tc(depmap);
 
      /* Mark recursive calls */
@@ -379,14 +379,14 @@ tree_output()
 	       symbols[i]->recursive = 1;
      free(depmap);
      free(symbols);
-     
+
      /* Collect and sort all symbols */
      num = collect_symbols(&symbols, is_var, 0);
      qsort(symbols, num, sizeof(*symbols), compare);
-	       
+
      /* Produce output */
      begin();
-    
+
      if (reverse_tree) {
 	  for (i = 0; i < num; i++) {
 	       inverted_tree(0, 0, symbols[i]);
@@ -394,6 +394,14 @@ tree_output()
 	  }
      } else {
 	  main_sym = lookup(start_name);
+    if(!main_sym){
+      for (int i = 0; i < num; i++) {
+        if(strcmp(symbols[i]->name, start_name)==0){
+          main_sym = symbols[i];
+          break;
+        }
+      }
+    }
 	  if (main_sym) {
 	       direct_tree(0, 0, main_sym);
 	       separator();
@@ -406,9 +414,9 @@ tree_output()
 	       }
 	  }
      }
-     
+
      end();
-     
+
      free(symbols);
 }
 
@@ -421,8 +429,8 @@ output()
 	  outfile = fopen(outname, "w");
 	  if (!outfile)
 	       error(EX_FATAL, errno, _("cannot open file `%s'"), outname);
-     } 
-     
+     }
+
      set_level_mark(0, 0);
      if (print_option & PRINT_XREF) {
 	  xref_output();
@@ -432,9 +440,3 @@ output()
      }
      fclose(outfile);
 }
-
-
-
-
-
-
